@@ -1,7 +1,8 @@
 import openai
+import base64
+import tempfile
 from typing import Dict, List
 from pathlib import Path
-
 from config.settings import load_settings
 from utils.logger import setup_logger
 from utils.helpers import retry_with_backoff
@@ -51,10 +52,15 @@ class CharacterDesigner:
                 n=1
             )
             
-            image_url = response.data[0].url
-            
-            self.logger.info(f"Character reference created: {image_url}")
-            return image_url
+            image_data = base64.b64decode(response.data[0].b64_json)
+
+            # Create a temporary file to save the image
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as temp_file:
+                temp_file.write(image_data)
+                temp_path = Path(temp_file.name)
+
+            self.logger.info(f"Character reference saved to temporary file: {temp_path}")
+            return temp_path
             
         except Exception as e:
             self.logger.error(f"Error creating character reference: {e}")
@@ -105,10 +111,15 @@ class CharacterDesigner:
                 n=1
             )
             
-            image_url = response.data[0].url
-            
-            self.logger.info(f"Scene image generated: {image_url}")
-            return image_url
+            image_data = base64.b64decode(response.data[0].b64_json)
+
+            # Create a temporary file to save the image
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as temp_file:
+                temp_file.write(image_data)
+                temp_path = Path(temp_file.name)
+
+            self.logger.info(f"Character reference saved to temporary file: {temp_path}")
+            return temp_path
             
         except Exception as e:
             self.logger.error(f"Error generating scene image: {e}")

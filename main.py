@@ -23,6 +23,9 @@ class AIVideoDirectorPipeline:
     def __init__(self):
         self.settings = load_settings()
         self.logger = setup_logger("pipeline")
+
+        self.settings.temp_dir.mkdir(parents=True, exist_ok=True)
+        self.settings.output_dir.mkdir(parents=True, exist_ok=True)
         
         # Initialize all components
         self.director = AIDirector()

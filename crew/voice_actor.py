@@ -1,7 +1,8 @@
 import os
 from pathlib import Path
+from typing import Dict, List, Optional
 from elevenlabs.client import ElevenLabs
-from elevenlabs import save, Voice, VoiceSettings
+from elevenlabs import save, Voice, VoiceSettings, ElevenLabs
 
 from config.settings import load_settings
 from utils.logger import setup_logger

@@ -16,6 +16,7 @@ class AIDirector:
         self.settings = load_settings()
         self.logger = setup_logger("ai_director")
         self.groq_client = Groq(api_key=self.settings.api.groq_api_key)
+        print(self.groq_client)
         
     @retry_with_backoff(max_retries=3)
     def create_production_plan(self, user_brief: str) -> ProductionPlan:
@@ -70,7 +71,7 @@ class AIDirector:
         
         try:
             response = self.groq_client.chat.completions.create(
-                model="mixtral-8x7b-32768",
+                model="llama-3.3-70b-versatile",
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": f"Create a video production plan for: {user_brief}"}
@@ -81,6 +82,11 @@ class AIDirector:
             
             content = response.choices[0].message.content
             self.logger.debug(f"Groq response: {content}")
+
+            if content.startswith("```json"):
+                content = content[7:]  # Remove ```json
+                if content.endswith("```"):
+                    content = content[:-3] # Remove trailing ```
             
             # Parse JSON response
             plan_data = json.loads(content)
@@ -146,13 +152,13 @@ class AIDirector:
         
         try:
             response = self.groq_client.chat.completions.create(
-                model="mixtral-8x7b-32768",
+                model="llama-3.3-70b-versatile",
                 messages=[
                     {"role": "system", "content": "You are an expert video editor syncing visuals to audio rhythm."},
                     {"role": "user", "content": refinement_prompt}
                 ],
                 temperature=0.3,
-                max_tokens=3000
+                max_completion_tokens=3000
             )
             
             content = response.choices[0].message.content
