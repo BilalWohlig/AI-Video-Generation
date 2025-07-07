@@ -37,13 +37,11 @@ class VoiceActor:
         
         try:
             # Generate audio
-            audio = self.client.generate(
+            audio = self.client.text_to_speech.convert(
                 text=script,
-                voice=Voice(
-                    voice_id=voice_id,
-                    settings=self.voice_settings
-                ),
-                model="eleven_multilingual_v2"
+                voice_id=voice_id,
+                voice_settings=self.voice_settings,
+                model_id="eleven_multilingual_v2"
             )
             
             # Save audio file
@@ -60,7 +58,7 @@ class VoiceActor:
         """Get list of available voices"""
         
         try:
-            voices = self.client.voices.get_all()
+            voices = self.client.voices.search(include_total_count=True)
             return [
                 {
                     "voice_id": voice.voice_id,

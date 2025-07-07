@@ -17,7 +17,7 @@ class CharacterDesigner:
         self.client = openai.Client(api_key=self.settings.api.openai_api_key)
         
     @retry_with_backoff(max_retries=3)
-    def create_character_reference(self, character: Character) -> str:
+    def create_character_reference(self, character: Character) -> Path:
         """Create character reference image using DALL-E 3"""
         
         self.logger.info(f"Creating character reference for: {character.name}")
@@ -47,8 +47,8 @@ class CharacterDesigner:
                 model="gpt-image-1",
                 prompt=prompt,
                 size="1024x1024",
-                quality="high",
-                # style="natural",
+                quality="medium",
+                # response_format="b64_json",  # Explicitly request base64
                 n=1
             )
             
@@ -67,7 +67,7 @@ class CharacterDesigner:
             raise
     
     @retry_with_backoff(max_retries=3)
-    def generate_character_scene_image(self, characters: List[Character], scene_description: str) -> str:
+    def generate_character_scene_image(self, characters: List[Character], scene_description: str) -> Path:
         """Generate scene image with specific characters using DALL-E 3"""
         
         self.logger.info(f"Generating scene with characters: {[c.name for c in characters]}")
@@ -106,8 +106,8 @@ class CharacterDesigner:
                 model="gpt-image-1",
                 prompt=full_prompt,
                 size="1024x1024",
-                quality="high",
-                # style="natural",
+                quality="medium",
+                # response_format="b64_json",  # Explicitly request base64
                 n=1
             )
             
@@ -118,7 +118,7 @@ class CharacterDesigner:
                 temp_file.write(image_data)
                 temp_path = Path(temp_file.name)
 
-            self.logger.info(f"Character reference saved to temporary file: {temp_path}")
+            self.logger.info(f"Character scene image saved to temporary file: {temp_path}")
             return temp_path
             
         except Exception as e:

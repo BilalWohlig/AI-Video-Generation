@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 from google.cloud import storage
 from urllib.parse import urlparse
 import requests
@@ -92,13 +92,39 @@ class MediaManager:
         
         return folders
     
-    def store_character_reference(self, character_name: str, image_url: str, project_id: str) -> str:
-        """Store character reference image in organized structure"""
+    def store_character_reference(self, character_name: str, image_source: Union[str, Path], project_id: str) -> str:
+        """Store character reference image in organized structure
+        
+        Args:
+            character_name: Name of the character
+            image_source: Either a URL string or local file Path
+            project_id: Project identifier
+            
+        Returns:
+            GCS public URL
+        """
         
         folders = self.organize_project_assets(project_id)
         remote_path = folders["characters"] + f"{character_name}_reference.jpg"
         
-        gcs_url = self.upload_from_url(image_url, remote_path)
+        # Check if image_source is a local file path or URL
+        if isinstance(image_source, (str, Path)):
+            # Convert to Path object for consistent handling
+            if isinstance(image_source, str):
+                # Check if it's a URL or local path
+                if image_source.startswith(('http://', 'https://')):
+                    # It's a URL, use upload_from_url
+                    gcs_url = self.upload_from_url(image_source, remote_path)
+                else:
+                    # It's a local path string, convert to Path and upload
+                    local_path = Path(image_source)
+                    gcs_url = self.upload_file(local_path, remote_path)
+            else:
+                # It's already a Path object, upload directly
+                gcs_url = self.upload_file(image_source, remote_path)
+        else:
+            raise ValueError(f"Invalid image_source type: {type(image_source)}. Expected str or Path.")
+        
         return gcs_url
     
     def store_scene_asset(self, scene_id: str, asset_url: str, project_id: str, asset_type: str = "videos") -> str:
@@ -111,6 +137,10 @@ class MediaManager:
             extension = ".mp4"
         elif asset_type == "images":
             extension = ".jpg"
+        elif asset_type == "music":
+            extension = ".mp3"
+        elif asset_type == "final":
+            extension = ".mp4"
         else:
             extension = ".file"
         

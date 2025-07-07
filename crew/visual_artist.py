@@ -51,7 +51,15 @@ class VisualArtist:
             )
             
             result = handler.get()
-            video_url = result["video"]["url"]
+            
+            # Handle different possible response structures
+            if "video" in result and "url" in result["video"]:
+                video_url = result["video"]["url"]
+            elif "url" in result:
+                video_url = result["url"]
+            else:
+                self.logger.error(f"Unexpected response structure: {result}")
+                raise Exception(f"Could not find video URL in response: {result}")
             
             self.logger.info(f"B-roll video generated: {video_url}")
             return video_url
@@ -126,7 +134,15 @@ class VisualArtist:
             )
             
             result = handler.get()
-            video_url = result["video"]["url"]
+            
+            # Handle different possible response structures
+            if "video" in result and "url" in result["video"]:
+                video_url = result["video"]["url"]
+            elif "url" in result:
+                video_url = result["url"]
+            else:
+                self.logger.error(f"Unexpected response structure: {result}")
+                raise Exception(f"Could not find video URL in response: {result}")
             
             self.logger.info(f"Character video scene generated: {video_url}")
             return video_url
@@ -156,7 +172,15 @@ class VisualArtist:
                 )
             
             result = handler.get()
-            video_url = result["video"]["url"]
+            
+            # Handle different possible response structures  
+            if "video" in result and "url" in result["video"]:
+                video_url = result["video"]["url"]
+            elif "url" in result:
+                video_url = result["url"]
+            else:
+                self.logger.error(f"Unexpected response structure: {result}")
+                raise Exception(f"Could not find video URL in response: {result}")
             
             self.logger.info(f"Talking avatar generated: {video_url}")
             return video_url

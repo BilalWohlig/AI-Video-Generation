@@ -16,7 +16,7 @@ class AIDirector:
         self.settings = load_settings()
         self.logger = setup_logger("ai_director")
         self.groq_client = Groq(api_key=self.settings.api.groq_api_key)
-        print(self.groq_client)
+        # Removed: print(self.groq_client)
         
     @retry_with_backoff(max_retries=3)
     def create_production_plan(self, user_brief: str) -> ProductionPlan:
