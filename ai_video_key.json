@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "proj-newsshield-prod-infra",
+  "private_key_id": "f072e42487f3944542873a710704bf3fd005fa6a",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQCz/cDEo7ArLXKK\nm98SAxLuEQUVfzOfS4oQcMHnZHFWJplqqqNhx8cP3d7s9WrmO6Gb/fizGZqVzD1x\nuve9QZi0gDXpaKSWScXNeAlr+ja6WLjsIIhOHPQO8i+htyO+cB++cv2LnFzsvpHV\nb8Dv/Lv8YAxo2cEPZdYNBhB1aMSIS8NiIiiStLeau0v+PPqhhkprJIFVn1ZslmSZ\nNh8Pi5RDkH2bY6U1ZsVm54LsOALOZxf32xywCrW4cnCcbTFq+iSIzS6BhB+t7lLp\n0BFtlLRRLE7It5YbF5zXzmLfaV0oyA2i6VUciEGrr6aI/HUMRb56hIcDAY8Bs5U+\nAUW8EdnPAgMBAAECggEABp5OOszRZbJiSQIp8IXIFJSaomuO0IzcsvW6eObixf9d\nr87o0BJ3ruKCgnsUZwqKoED1UVH1MwyTYShgrgcIoEaAn6hh45wrLP7SIIl5qV4p\nepadpyWoZxj1CGttYeDJ7LJaFrVKs3KJy+vej9SJbbfIbQiTcUdWLhzAI9kU36AT\nGlz3BXNZ74vqH7iC2kCCj6HFg8CzXNonyf7BEOpuGLyeAvaUXZRqbs/RNCtQIs67\n4JeN1vP/1DMvjlOG0AG9gCOE6Xt1gOUSfUXfNtuPjszzXSwPQTrVz42itDs+NWAo\nFCfUEHZqQ5e8YWizmhvCBV9cWNBs//1aKDswZ93cMQKBgQDeB6I99JRssGe3admL\n4mOPSS6UD+N74U+HcZF7Yq65cD99jLPrVwoqdPYBPhFGNLUtXbajFmS3ZBg30zl+\nu0EYWimEaJC/YFpI1mBJSJqT1I6XPv5ZATIyXCM/x8IW9QfcRohgH52fsMvIY9Wr\n2B/jvTavQ5a920xRdBKUj/o0HwKBgQDPh5Hq0kgWn/r7pSibp5EgEqVMoVXlCaMc\nYchTnKCeyXef1qzSqB5RICCi4QjM10mhceNYPiWr32ztQQ7ACFmCZStaGuTuIzOc\nerDL+tO7tKJxyLWQUgenT/pJnYvIzRMhBWulMekWBPJafcZzWn6dYIF7u5TnhU0r\nXUqshw0kUQKBgQDF//DDZ3VlZ/tWKWMDyCQZB54uE+098DPICZM/gUVnwZ4dDHj2\nimxaaGtpuDwXa7GWf1f8IGA4215tikRfrAXk/aLAna9Xu0lIY0UClWikJI30ewy/\nur1VA627lxyS9HjKC2xarFcYrcVNMxq9YMMviPFXYuLu9L4edXCMY8kw6QKBgQCZ\n1jA3druTcfH1+p8Yi2WL9eZs4Kewia1My7tZJ6D1M/kmFle0LIWUs5EdzFzeo7Rk\nJe1WK3N3bb7sPK63cTkQ7Pfu6kLLuHJ4y4YlHwE3gpZsbFES84vS3fl1+oB1UHee\nocsDAPV8qhwRMm0ac3mqJbC2TP37hZgHzjcdn1sBkQKBgQCdRIuxpoZ6b3zgetTD\npNex9uuJ+/mAzT3Tgn6Wh9KbzOL1jzxCqr+K6+euPYb/w7GNPosIW3JeHNXAc0rb\nOcsf8LFL5Ne3Hk7cVITuiI5L7Sr5a6FsuQtDqN72mnKWDkzWRQLBsaK+qOH6BD4Y\nxeIn5VvwY+s9eNDFxZTXbc4SrQ==\n-----END PRIVATE KEY-----\n",
+  "client_email": "genai-videos@proj-newsshield-prod-infra.iam.gserviceaccount.com",
+  "client_id": "105278422179202772811",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/genai-videos%40proj-newsshield-prod-infra.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
