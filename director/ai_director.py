@@ -16,7 +16,6 @@ class AIDirector:
         self.settings = load_settings()
         self.logger = setup_logger("ai_director")
         self.groq_client = Groq(api_key=self.settings.api.groq_api_key)
-        # Removed: print(self.groq_client)
         
     @retry_with_backoff(max_retries=3)
     def create_production_plan(self, user_brief: str) -> ProductionPlan:
@@ -120,54 +119,123 @@ class AIDirector:
         
         self.logger.info("Refining production plan with audio rhythm analysis")
         
-        refinement_prompt = f"""
-        You are refining a video production plan based on actual audio analysis. 
+        # Extract only essential timing data to reduce token usage
+        scenes_summary = []
+        for scene in production_plan.scenes:
+            scenes_summary.append({
+                "id": scene.id,
+                "duration_estimate": scene.duration_estimate,
+                "description": scene.description[:100] + "..." if len(scene.description) > 100 else scene.description,
+                "script_segment": scene.script_segment[:200] + "..." if len(scene.script_segment) > 200 else scene.script_segment,
+                "visual_type": scene.visual_type,
+                "characters": scene.characters,
+                "mood": scene.mood,
+                "camera_angle": scene.camera_angle
+            })
         
-        Original Plan: {json.dumps(production_plan.to_dict(), indent=2)}
+        # Extract only key timing information from rhythm map
+        rhythm_summary = {
+            "duration": rhythm_map.get("duration", 0),
+            "tempo": rhythm_map.get("tempo", 120),
+            "natural_breaks": [
+                {"start": br["start"], "end": br["end"], "duration": br["duration"], "type": br["type"]}
+                for br in rhythm_map.get("natural_breaks", [])[:10]
+            ],
+            "emphasis_points": [
+                {"timestamp": ep["timestamp"], "intensity": ep["intensity"]}
+                for ep in rhythm_map.get("emphasis_points", [])[:10]
+            ],
+            "pacing_style": rhythm_map.get("pacing_recommendations", {}).get("pacing_style", "steady"),
+            "avg_scene_duration": rhythm_map.get("pacing_recommendations", {}).get("avg_scene_duration", 5.0)
+        }
         
-        Audio Rhythm Analysis: {json.dumps(rhythm_map, indent=2)}
+        # Build prompt without f-strings to avoid format conflicts
+        scenes_json = json.dumps(scenes_summary, indent=1)
+        breaks_json = json.dumps(rhythm_summary['natural_breaks'][:5], indent=1)
+        emphasis_json = json.dumps(rhythm_summary['emphasis_points'][:5], indent=1)
         
-        Update the scene timings to perfectly sync with the actual audio rhythm. 
-        Adjust start_time, end_time, and duration for each scene based on:
-        - Speech segments and natural breaks
-        - Emphasis points for visual highlights
-        - Overall tempo and rhythm
+        duration_str = str(round(rhythm_summary['duration'], 1))
+        tempo_str = str(round(rhythm_summary['tempo'], 1))
+        avg_duration_str = str(rhythm_summary['avg_scene_duration'])
         
-        Return the updated scenes array in JSON format:
-        [
-          {{
-            "id": "scene_id",
-            "start_time": float,
-            "end_time": float,
-            "duration": float,
-            "description": "updated if needed",
-            "script_segment": "same as before",
-            "visual_type": "same as before",
-            "characters": ["same as before"],
-            "mood": "same as before",
-            "camera_angle": "same as before"
-          }}
-        ]
-        """
+        refinement_prompt = """Refine video scene timings based on audio analysis.
+
+Current Scenes (""" + str(len(scenes_summary)) + """ total):
+""" + scenes_json + """
+
+Audio Analysis:
+- Total Duration: """ + duration_str + """s
+- Tempo: """ + tempo_str + """ BPM
+- Pacing Style: """ + rhythm_summary['pacing_style'] + """
+- Recommended Scene Duration: """ + avg_duration_str + """s
+
+Key Natural Breaks:
+""" + breaks_json + """
+
+Key Emphasis Points:
+""" + emphasis_json + """
+
+Update scene timings to sync with audio rhythm. Calculate start_time and end_time for each scene based on:
+- Natural speech breaks for scene transitions
+- Emphasis points for visual highlights
+- Overall audio duration and pacing
+
+Return updated scenes JSON array with timing info only:
+[
+  {
+    "id": "scene_id",
+    "start_time": 0.0,
+    "end_time": 5.0,
+    "duration": 5.0
+  }
+]
+
+Only include id, start_time, end_time, and duration for each scene."""
         
         try:
             response = self.groq_client.chat.completions.create(
                 model="llama-3.3-70b-versatile",
                 messages=[
-                    {"role": "system", "content": "You are an expert video editor syncing visuals to audio rhythm."},
+                    {"role": "system", "content": "You are an expert video editor syncing visuals to audio rhythm. Return only JSON with timing data."},
                     {"role": "user", "content": refinement_prompt}
                 ],
                 temperature=0.3,
-                max_completion_tokens=3000
+                max_tokens=3000
             )
             
             content = response.choices[0].message.content
-            updated_scenes_data = json.loads(content)
             
-            # Update scenes in production plan
+            # Clean response if it has code blocks
+            if content.startswith("```json"):
+                content = content[7:]
+                if content.endswith("```"):
+                    content = content[:-3]
+            elif content.startswith("```"):
+                content = content[3:]
+                if content.endswith("```"):
+                    content = content[:-3]
+            
+            updated_scenes_data = json.loads(content.strip())
+            
+            # Update scenes in production plan with new timing
             updated_scenes = []
-            for scene_data in updated_scenes_data:
-                scene = Scene(**scene_data)
+            for i, scene_data in enumerate(updated_scenes_data):
+                # Get original scene data
+                original_scene = production_plan.scenes[i] if i < len(production_plan.scenes) else production_plan.scenes[0]
+                
+                # Create updated scene with new timing but original content
+                scene = Scene(
+                    id=scene_data.get("id", original_scene.id),
+                    start_time=float(scene_data.get("start_time", 0)),
+                    end_time=float(scene_data.get("end_time", 5)),
+                    duration_estimate=float(scene_data.get("duration", scene_data.get("end_time", 5) - scene_data.get("start_time", 0))),
+                    description=original_scene.description,
+                    script_segment=original_scene.script_segment,
+                    visual_type=original_scene.visual_type,
+                    characters=original_scene.characters,
+                    mood=original_scene.mood,
+                    camera_angle=original_scene.camera_angle
+                )
                 updated_scenes.append(scene)
             
             production_plan.scenes = updated_scenes

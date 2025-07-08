@@ -33,6 +33,25 @@ class MusicComposer:
         
         mood_params = mood_mapping.get(mood, {"energy": "medium", "tempo": "medium"})
         
+        # If a Beatoven (or any other) API key is provided via environment variables, we can
+        # attempt to call the real service. Otherwise, fall back to a stub/placeholder URL so
+        # that offline development & testing does **not** try to hit the fake example domain
+        # (which causes a ConnectionError and crashes the pipeline).
+
+        beatoven_api_key = self.settings.api.beatoven_api_key
+
+        # 1) No real API key available – simply return a placeholder asset that downstream code
+        #    will recognise and skip uploading (handled in main._phase_3_media_generation).
+        if not beatoven_api_key:
+            placeholder_url = "https://placeholder-music-url.com"
+            self.logger.info(
+                "No music generation API key configured – returning placeholder music URL: %s",
+                placeholder_url,
+            )
+            return placeholder_url
+
+        # 2) API key present – attempt to call the real service. If *that* fails we will still
+        #    fall back to the same placeholder so that the rest of the pipeline can continue.
         try:
             # For now, return a placeholder URL
             # In production, implement actual music generation API

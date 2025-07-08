@@ -25,6 +25,10 @@ class AudioAnalyzer:
             # Extract rhythm features
             tempo, beats = librosa.beat.beat_track(y=y, sr=sr)
             
+            # Convert numpy values to Python scalars for safe formatting
+            tempo_scalar = float(tempo) if hasattr(tempo, 'item') else tempo
+            duration_scalar = float(duration) if hasattr(duration, 'item') else duration
+            
             # Detect speech segments vs silence
             intervals = librosa.effects.split(y, top_db=20)
             
@@ -40,8 +44,8 @@ class AudioAnalyzer:
             
             # Create comprehensive rhythm map
             rhythm_map = {
-                "duration": float(duration),
-                "tempo": float(tempo),
+                "duration": duration_scalar,
+                "tempo": tempo_scalar,
                 "beats": [float(beat * 512 / sr) for beat in beats],  # Convert to seconds
                 "speech_segments": [
                     {
@@ -58,7 +62,7 @@ class AudioAnalyzer:
                 "pacing_recommendations": self._generate_pacing_recommendations(rms, beats, natural_breaks, sr)
             }
             
-            self.logger.info(f"Rhythm analysis complete - Duration: {duration:.2f}s, Tempo: {tempo:.1f} BPM")
+            self.logger.info(f"Rhythm analysis complete - Duration: {duration_scalar:.2f}s, Tempo: {tempo_scalar:.1f} BPM")
             return rhythm_map
             
         except Exception as e:
@@ -137,6 +141,8 @@ class AudioAnalyzer:
         samples_per_interval = int(sample_rate * sr / 512)  # frames per interval
         
         energy_profile = []
+        rms_max = float(np.max(rms))  # Convert to scalar
+        
         for i in range(0, len(rms), samples_per_interval):
             end_idx = min(i + samples_per_interval, len(rms))
             interval_energy = np.mean(rms[i:end_idx])
@@ -145,7 +151,7 @@ class AudioAnalyzer:
             energy_profile.append({
                 "timestamp": timestamp,
                 "energy": float(interval_energy),
-                "relative_energy": float(interval_energy / np.max(rms))  # Normalized 0-1
+                "relative_energy": float(interval_energy / rms_max)  # Normalized 0-1
             })
         
         return energy_profile
@@ -153,13 +159,13 @@ class AudioAnalyzer:
     def _generate_pacing_recommendations(self, rms: np.ndarray, beats: np.ndarray, natural_breaks: List[Dict], sr: int) -> Dict[str, any]:
         """Generate intelligent pacing recommendations for video editing"""
         
-        avg_energy = np.mean(rms)
-        energy_variance = np.var(rms)
+        avg_energy = float(np.mean(rms))
+        energy_variance = float(np.var(rms))
         
         # Determine overall pacing style
         if energy_variance > avg_energy * 0.3:
             pacing_style = "dynamic"  # High energy variation
-        elif avg_energy > np.percentile(rms, 70):
+        elif avg_energy > float(np.percentile(rms, 70)):
             pacing_style = "energetic"  # Consistently high energy
         else:
             pacing_style = "steady"  # Stable energy

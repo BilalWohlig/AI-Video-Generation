@@ -47,7 +47,7 @@ class CharacterDesigner:
                 model="gpt-image-1",
                 prompt=prompt,
                 size="1024x1024",
-                quality="medium",
+                quality="low",
                 # response_format="b64_json",  # Explicitly request base64
                 n=1
             )
@@ -106,7 +106,7 @@ class CharacterDesigner:
                 model="gpt-image-1",
                 prompt=full_prompt,
                 size="1024x1024",
-                quality="medium",
+                quality="low",
                 # response_format="b64_json",  # Explicitly request base64
                 n=1
             )

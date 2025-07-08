@@ -97,17 +97,17 @@ class AIVideoDirectorPipeline:
         self.logger.info("Creating character reference images with OpenAI DALL-E 3...")
         for character in self.production_plan.characters:
             # Generate character reference image
-            character_image_url = self.character_designer.create_character_reference(character)
+            character_image_path = self.character_designer.create_character_reference(character)
             
             # Store in Google Cloud Storage
             gcs_url = self.media_manager.store_character_reference(
                 character.name,
-                character_image_url,
+                character_image_path,
                 self.project_id
             )
             
-            # Update character with GCS URLs
-            character.reference_image_url = character_image_url
+            # Update character with URLs as strings (not Path objects)
+            character.reference_image_url = str(character_image_path)  # Convert Path to string
             character.gcs_image_url = gcs_url
             self.media_assets["characters"][character.name] = gcs_url
             
@@ -280,5 +280,3 @@ class AIVideoDirectorPipeline:
                 "project_folder": f"projects/{self.project_id}/"
             }
         }
-    
-    
